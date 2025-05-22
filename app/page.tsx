@@ -1,26 +1,63 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
+
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AlertTriangle, CheckCircle, FileText, Clock, Shield, BookOpen, Scale, FileCheck, X } from "lucide-react"
+import {
+  AlertTriangle,
+  CheckCircle,
+  FileText,
+  Clock,
+  Shield,
+  BookOpen,
+  Scale,
+  FileCheck,
+  X,
+  Github,
+  Code,
+  ChevronDown,
+} from "lucide-react"
 
 export default function Home() {
   const [showCookieConsent, setShowCookieConsent] = useState(false)
+  const [showHistoryPopup, setShowHistoryPopup] = useState(false)
+
+  // Refs for scrolling to sections
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const riskCategoriesRef = useRef<HTMLDivElement>(null)
+  const complianceRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Check if user has already consented
+    // Check if user has already consented to cookies
     const hasConsented = localStorage.getItem("cookieConsent")
     if (!hasConsented) {
       setShowCookieConsent(true)
+    }
+
+    // Check if user has seen the history popup
+    const hasSeenHistoryPopup = localStorage.getItem("historyPopupSeen")
+    if (!hasSeenHistoryPopup) {
+      setShowHistoryPopup(true)
     }
   }, [])
 
   const handleCookieConsent = (consent: boolean) => {
     localStorage.setItem("cookieConsent", consent ? "accepted" : "declined")
     setShowCookieConsent(false)
+  }
+
+  const handleHistoryPopupClose = () => {
+    localStorage.setItem("historyPopupSeen", "true")
+    setShowHistoryPopup(false)
+  }
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    ref.current?.scrollIntoView({ behavior: "smooth" })
   }
 
   return (
@@ -30,25 +67,37 @@ export default function Home() {
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('/abstract-digital-network.png')] bg-cover bg-center" />
         </div>
-        <div className="container mx-auto px-4 py-20 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">EU AI Act Guide</h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
-              A comprehensive guide to understanding Europe's first regulatory framework for artificial intelligence
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button className="bg-white text-blue-700 hover:bg-blue-50">Download Guide</Button>
-              <Button variant="outline" className="bg-green-600 text-white border-green-500 hover:bg-green-700">
-                Explore Timeline
-              </Button>
-            </div>
+        <div className="max-w-4xl mx-auto text-center relative z-10 px-4 py-20">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">EU AI Act Guide</h1>
+          <p className="text-xl md:text-2xl mb-8 opacity-90">
+            A comprehensive guide to understanding Europe's first regulatory framework for artificial intelligence
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button className="bg-white text-blue-700 hover:bg-blue-50 transform transition-transform duration-300 hover:scale-105">
+              Download Guide
+            </Button>
+            <Button
+              variant="outline"
+              className="bg-green-600 text-white border-green-500 hover:bg-green-700 transform transition-transform duration-300 hover:scale-105"
+              onClick={() => scrollToSection(timelineRef)}
+            >
+              Explore Timeline
+            </Button>
+          </div>
+          <div className="mt-12 animate-bounce">
+            <button
+              onClick={() => scrollToSection(timelineRef)}
+              className="text-white opacity-80 hover:opacity-100 transition-opacity"
+              aria-label="Scroll down"
+            >
+              <ChevronDown className="h-8 w-8" />
+            </button>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-white clip-path-wave"></div>
       </section>
 
       {/* Timeline Section */}
-      <section className="py-16 container mx-auto px-4 max-w-6xl">
+      <section ref={timelineRef} className="py-16 container mx-auto px-4 max-w-6xl scroll-mt-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-slate-900">EU AI Act Timeline</h2>
           <p className="text-slate-600 max-w-3xl mx-auto">
@@ -125,13 +174,13 @@ export default function Home() {
                   <div key={index} className="mb-12 relative">
                     {/* Timeline bullet */}
                     <div
-                      className={`absolute -left-[25px] w-12 h-12 rounded-full ${point.colorClasses} border-4 flex items-center justify-center shadow-md`}
+                      className={`absolute -left-[25px] w-12 h-12 rounded-full ${point.colorClasses} border-4 flex items-center justify-center shadow-md mr-4 mt-2`}
                     >
                       <Clock className="h-5 w-5" />
                     </div>
 
                     {/* Content */}
-                    <div className="pl-4">
+                    <div className="pl-8">
                       <p className="font-bold text-green-700 text-lg">{point.date}</p>
                       <h3 className="font-medium text-slate-900 text-xl mb-2">{point.title}</h3>
                       <p className="text-slate-600">{point.desc}</p>
@@ -142,10 +191,20 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        <div className="text-center">
+          <Button
+            onClick={() => scrollToSection(riskCategoriesRef)}
+            className="bg-green-600 hover:bg-green-700 transform transition-transform duration-300 hover:scale-105"
+          >
+            Explore Risk Categories
+            <ChevronDown className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
       </section>
 
       {/* Risk Categories Section */}
-      <section className="py-16 container mx-auto px-4 max-w-6xl">
+      <section ref={riskCategoriesRef} className="py-16 container mx-auto px-4 max-w-6xl scroll-mt-16">
         <h2 className="text-3xl font-bold mb-12 text-center text-slate-900">Risk-Based Approach</h2>
         <p className="text-center text-slate-700 mb-12 max-w-3xl mx-auto">
           The EU AI Act categorizes AI systems based on their potential risk level, with different requirements for each
@@ -488,6 +547,16 @@ export default function Home() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <div className="text-center mt-12">
+          <Button
+            onClick={() => scrollToSection(complianceRef)}
+            className="bg-green-600 hover:bg-green-700 transform transition-transform duration-300 hover:scale-105"
+          >
+            View Compliance Guide
+            <ChevronDown className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
       </section>
 
       {/* Visual Risk Matrix */}
@@ -582,7 +651,7 @@ export default function Home() {
       </section>
 
       {/* Compliance Section */}
-      <section className="py-16 bg-slate-100">
+      <section ref={complianceRef} className="py-16 bg-slate-100 scroll-mt-16">
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-3xl font-bold mb-12 text-center text-slate-900">Compliance Guide</h2>
 
@@ -749,7 +818,16 @@ export default function Home() {
             comprehensive AI legislation.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button className="bg-white text-blue-700 hover:bg-blue-50">Download Compliance Checklist</Button>
+            <Link href="/compliance-checklist">
+              <Button className="bg-white text-blue-700 hover:bg-blue-50 transform transition-transform duration-300 hover:scale-105">
+                Compliance Checklist
+              </Button>
+            </Link>
+            <Link href="/implementation-guide">
+              <Button className="bg-white text-blue-700 hover:bg-blue-50 transform transition-transform duration-300 hover:scale-105">
+                Implementation Guide
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -757,7 +835,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-300 py-12">
         <div className="container mx-auto px-4 max-w-6xl">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-white font-bold text-lg mb-4">EU AI Act Guide</h3>
               <p className="text-sm">
@@ -775,87 +853,50 @@ export default function Home() {
               <h4 className="text-white font-bold mb-4">Resources</h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="hover:text-white">
+                  <a
+                    href="https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ%3AL_202401689"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white"
+                  >
                     Official EU AI Act Text
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white">
-                    Compliance Toolkit
-                  </a>
+                  <Link href="/compliance-checklist" className="hover:text-white">
+                    Compliance Checklist
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white">
-                    Risk Assessment Template
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
+                  <Link href="/implementation-guide" className="hover:text-white">
                     Implementation Guide
-                  </a>
+                  </Link>
                 </li>
               </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Timeline
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Risk Categories
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Compliance Guide
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white">
-                    Penalties
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-4">Stay Updated</h4>
-              <p className="text-sm mb-4">Subscribe to receive updates on the EU AI Act implementation.</p>
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  className="px-3 py-2 text-slate-900 text-sm rounded-l-md focus:outline-none w-full"
-                />
-                <Button className="rounded-l-none">Subscribe</Button>
-              </div>
             </div>
           </div>
 
-          {/* Company Logos */}
+          {/* Source Code Link */}
           <div className="mt-12 border-t border-slate-700 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <div className="flex flex-col md:flex-row items-center gap-6 mb-6 md:mb-0">
-              <div className="flex items-center">
-                <Image
-                  src="/placeholder-cmc5a.png"
-                  alt="Trifork Logo"
-                  width={120}
-                  height={40}
-                  className="h-10 object-contain"
-                />
-              </div>
-              <div className="flex items-center">
-                <Image
-                  src="/gorrissen-federspiel-logo.png"
-                  alt="Gorrissen Federspiel Logo"
-                  width={120}
-                  height={40}
-                  className="h-10 object-contain"
-                />
-              </div>
+            <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+              <a
+                href="https://github.com/NielsGregers/eu-ai-act-guide"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2"
+              >
+                <Github className="h-5 w-5" />
+                View Source Code on GitHub
+              </a>
+              <a
+                href="https://v0.dev/chat/5hoTAIAOqVu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2"
+              >
+                <FileText className="h-5 w-5" />
+                View v0 Chat History
+              </a>
             </div>
             <div>
               <a
@@ -875,6 +916,179 @@ export default function Home() {
         </div>
       </footer>
 
+      {/* History Popup */}
+      {showHistoryPopup && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-2xl font-bold text-slate-900">About This Guide</h2>
+                <button
+                  onClick={handleHistoryPopupClose}
+                  className="text-slate-400 hover:text-slate-600"
+                  aria-label="Close"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="prose prose-slate max-w-none">
+                <p>
+                  Welcome to the EU AI Act Guide! This educational resource was created to help understand the European
+                  Union's first comprehensive legal framework on artificial intelligence.
+                </p>
+
+                <h3 className="text-lg font-semibold mt-4">Project History</h3>
+                <p>
+                  This guide was purely AI-generated based on inspiration from dialogue at a meeting regarding the EU AI
+                  Act held on May 22, 2025, with prompts curated by Niels Gregers Johansen. It serves as an educational
+                  demonstration of how AI can be used to create informative content about regulatory frameworks.
+                </p>
+
+                <h3 className="text-lg font-semibold mt-4">Development Process</h3>
+                <p>
+                  This guide was created using v0, Vercel's AI-powered assistant. The entire site was built through a
+                  series of prompts and iterations, showcasing the capabilities of AI in creating educational content
+                  and functional web applications.
+                </p>
+
+                <div className="bg-slate-50 p-4 rounded-lg my-4">
+                  <h4 className="text-md font-semibold mb-2 flex items-center gap-2">
+                    <Code className="h-5 w-5 text-blue-600" />
+                    Development Timeline & User Inputs
+                  </h4>
+                  <ol className="space-y-3 text-sm">
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Initial Request:</span> "Create a dummy guide on the new EU AI
+                      Act, including a timeline"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Visual Enhancement:</span> "Add a Mermaid timeline and other
+                      visual elements"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Timeline Styling:</span> "Create a vertical timeline with color
+                      bullets" followed by "Make the timeline in a secondary green color"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">PDF Link:</span> "Make the image in the timeline section link to a
+                      PDF" and later "Replace the image with a link"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Button Styling:</span> "Make the 'Explore Timeline' call to action
+                      button in the green style"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Branding & Disclaimers:</span> "Add branding with Trifork and
+                      Gorrissen Federspiel logos in the footer, a disclaimer about the AI-generated nature of the
+                      content, a link to magicbutton.cloud in the footer, and a cookie consent banner"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">UI Refinements:</span> Multiple requests to adjust UI elements,
+                      including "Remove the 'Schedule a Consultation' button" and "Remove a container div in the hero
+                      section"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Initial Popup:</span> "Add an initial popup with consent stored in
+                      local storage, informing on the history of the site, and including a link to the source code"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Timeline Adjustments:</span> Multiple requests to adjust spacing
+                      and margins in the timeline section
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Analytics Integration:</span> "Add Microsoft Clarity tracking
+                      script and Vercel Analytics"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Additional Pages:</span> "Generate a page with a compliance check
+                      list, add a download as excel to that, link to the page from 'Download Compliance Checklist' -
+                      Rename 'Download Compliance Checklist' to 'Compliance Checklist' and do the same for
+                      implementation guide"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Excel Download Fix:</span> "The code returns an error: Uncaught
+                      TypeError: Deno.writeFileSync is not a function. Revise the code to address the error."
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Chat History Link:</span> "Add a link to
+                      https://v0.dev/chat/5hoTAIAOqVu"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Process Documentation:</span> "Include a description of the
+                      process making this site. Show all the input I have given"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">Excel Formatting:</span> "Format the excel output with colored
+                      table"
+                    </li>
+                    <li className="border-l-2 border-blue-200 pl-4 py-1">
+                      <span className="font-semibold">UI Improvements:</span> "Remove the white half circle in the
+                      header and make the most important buttons have an animated transition to the section"
+                    </li>
+                  </ol>
+                </div>
+
+                <h3 className="text-lg font-semibold mt-4">Technologies Used</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Next.js 14 (App Router)</li>
+                  <li>React 18</li>
+                  <li>TypeScript</li>
+                  <li>Tailwind CSS</li>
+                  <li>shadcn/ui components</li>
+                  <li>XLSX library for Excel exports</li>
+                  <li>Vercel Analytics</li>
+                  <li>Microsoft Clarity for user behavior tracking</li>
+                </ul>
+
+                <h3 className="text-lg font-semibold mt-4">Open Source</h3>
+                <p>
+                  This project is open source and available on GitHub. You can view the source code, contribute, or fork
+                  the project at:
+                </p>
+                <div className="bg-slate-100 p-3 rounded-md my-3">
+                  <a
+                    href="https://github.com/NielsGregers/eu-ai-act-guide"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+                  >
+                    <Github className="h-5 w-5" />
+                    github.com/NielsGregers/eu-ai-act-guide
+                  </a>
+                </div>
+
+                <h3 className="text-lg font-semibold mt-4">Disclaimer</h3>
+                <p className="text-sm text-slate-600">
+                  This guide is for educational purposes only and should not be considered legal advice. The content is
+                  AI-generated and may not reflect the final provisions of the EU AI Act. Always consult with legal
+                  professionals for advice on regulatory compliance.
+                </p>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handleHistoryPopupClose}
+                  className="border-slate-300 text-slate-700 hover:bg-slate-100"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    window.open("https://github.com/NielsGregers/eu-ai-act-guide", "_blank")
+                    handleHistoryPopupClose()
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  View on GitHub
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Cookie Consent Banner */}
       {showCookieConsent && (
         <div className="fixed bottom-0 left-0 right-0 bg-slate-800 text-white p-4 shadow-lg z-50">
@@ -889,7 +1103,7 @@ export default function Home() {
             <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
-                className="text-white border-white hover:bg-slate-700"
+                className="bg-transparent text-white border-white hover:bg-slate-700 hover:text-white"
                 onClick={() => handleCookieConsent(false)}
               >
                 Decline
@@ -908,15 +1122,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      <style jsx global>{`
-        .clip-path-wave {
-          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-          shape-outside: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-          border-radius: 0 0 50% 50% / 0 0 100% 100%;
-          transform: translateY(1px);
-        }
-      `}</style>
     </div>
   )
 }
