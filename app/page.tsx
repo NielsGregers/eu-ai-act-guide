@@ -73,8 +73,11 @@ export default function Home() {
             A comprehensive guide to understanding Europe's first regulatory framework for artificial intelligence
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button className="bg-white text-blue-700 hover:bg-blue-50 transform transition-transform duration-300 hover:scale-105">
-              Download Guide
+            <Button
+              className="bg-white text-blue-700 hover:bg-blue-50 transform transition-transform duration-300 hover:scale-105"
+              onClick={() => setShowHistoryPopup(true)}
+            >
+              About
             </Button>
             <Button
               variant="outline"
